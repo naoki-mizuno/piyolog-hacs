@@ -12,7 +12,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.event import async_track_time_interval
 
 from .client import PiyoLogClient, BreastfeedingOrder
-from .coordinator import PiyoLogCoordinator
+from .coordinator import PiyoLogCoordinator, UpdateFailed
 from .const import (
     DOMAIN,
     CONF_USER_ID,
@@ -109,8 +109,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Create coordinator for syncing
     coordinator = PiyoLogCoordinator(hass, client, update_interval)
 
-    # Perform initial refresh to populate data
-    await coordinator.async_config_entry_first_refresh()
+    # Perform initial refresh to populate data (non-blocking for setup)
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except UpdateFailed as err:
+        # Allow setup to complete so services (e.g. add_sleep) are available
+        # even when sync fails (e.g. 407 session/credentials issue)
+        _LOGGER.warning(
+            "Initial PiyoLog sync failed: %s. Integration loaded; "
+            "services are available. Sync will retry on the configured interval.",
+            err,
+        )
 
     # Store client and coordinator
     hass.data[DOMAIN][entry.entry_id] = {

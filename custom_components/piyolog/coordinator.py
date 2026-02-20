@@ -94,8 +94,15 @@ class PiyoLogCoordinator(DataUpdateCoordinator):
                 self.client._minor_version,
             )
 
-            if response.get("status") != 200:
-                raise UpdateFailed(f"PiyoLog API error: {response.get('status')}")
+            status = response.get("status")
+            if status != 200:
+                if status == 407:
+                    _LOGGER.warning(
+                        "PiyoLog API returned 407. Your session may have expired or "
+                        "credentials are invalid. Re-add the integration or check "
+                        "your PiyoLog account linking."
+                    )
+                raise UpdateFailed(f"PiyoLog API error: {status}")
 
             data = response.get("data", {})
 
