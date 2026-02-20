@@ -1,0 +1,66 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up PiyoLog",
+        "description": "Choose how you want to authenticate with PiyoLog",
+        "data": {
+          "auth_method": "Authentication Method"
+        },
+        "data_description": {
+          "auth_method": "Create new account and link it, or use existing credentials"
+        }
+      },
+      "create": {
+        "title": "Create New Account",
+        "description": "Create a new PiyoLog device. This will generate credentials that you'll use to link to your existing account.",
+        "data": {
+          "device_name": "Device Name"
+        }
+      },
+      "existing": {
+        "title": "Use Existing Credentials",
+        "description": "Enter your existing PiyoLog credentials. You can find these in your PiyoLog app settings or from a previous setup.",
+        "data": {
+          "user_id": "User ID",
+          "client_id": "Client ID",
+          "client_token": "Client Token"
+        }
+      },
+      "link": {
+        "title": "Link to Existing Account",
+        "description": "Enter your PiyoLog User ID and Share Code. To get these:\n1. Open PiyoLog app\n2. Go to Settings → Share\n3. Tap 'Issue Code'\n4. Enter the displayed information below",
+        "data": {
+          "other_user_id": "User ID",
+          "share_code": "Share Code"
+        }
+      },
+      "select_baby": {
+        "title": "Select Default Baby",
+        "description": "Choose which baby should be used by default for events",
+        "data": {
+          "baby_index": "Baby"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to PiyoLog API",
+      "invalid_auth": "Invalid credentials or share code",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "This account is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "PiyoLog Options",
+        "description": "Configure PiyoLog integration options",
+        "data": {
+          "sync_interval": "Sync Interval (seconds)"
+        }
+      }
+    }
+  }
+}

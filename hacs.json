@@ -1,0 +1,7 @@
+{
+  "name": "PiyoLog Baby Tracker",
+  "render_readme": true,
+  "domains": ["piyolog"],
+  "iot_class": "cloud_polling",
+  "homeassistant": "2026.2.0"
+}

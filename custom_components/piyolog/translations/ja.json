@@ -1,0 +1,66 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ぴよログの設定",
+        "description": "ぴよログへの認証方法を選択してください",
+        "data": {
+          "auth_method": "認証方法"
+        },
+        "data_description": {
+          "auth_method": "新しいアカウントを作成してリンクするか、既存の認証情報を使用します"
+        }
+      },
+      "create": {
+        "title": "新しいアカウントを作成",
+        "description": "新しいぴよログデバイスを作成します。これにより認証情報が生成され、既存のアカウントにリンクできるようになります。",
+        "data": {
+          "device_name": "デバイス名"
+        }
+      },
+      "existing": {
+        "title": "既存の認証情報を使用",
+        "description": "既存のぴよログ認証情報を入力してください。これらはぴよログアプリの設定または以前のセットアップから確認できます。",
+        "data": {
+          "user_id": "ユーザーID",
+          "client_id": "クライアントID",
+          "client_token": "クライアントトークン"
+        }
+      },
+      "link": {
+        "title": "既存のアカウントにリンク",
+        "description": "ぴよログのユーザーIDと共有コードを入力してください。取得方法：\n1. ぴよログアプリを開く\n2. 設定 → 共有 に移動\n3. 「コードを発行」をタップ\n4. 表示された情報を以下に入力",
+        "data": {
+          "other_user_id": "ユーザーID",
+          "share_code": "共有コード"
+        }
+      },
+      "select_baby": {
+        "title": "デフォルトの赤ちゃんを選択",
+        "description": "イベントのデフォルトとして使用する赤ちゃんを選択してください",
+        "data": {
+          "baby_index": "赤ちゃん"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "ぴよログAPIへの接続に失敗しました",
+      "invalid_auth": "認証情報または共有コードが無効です",
+      "unknown": "予期しないエラーが発生しました"
+    },
+    "abort": {
+      "already_configured": "このアカウントは既に設定されています"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "ぴよログオプション",
+        "description": "ぴよログ連携のオプションを設定",
+        "data": {
+          "sync_interval": "同期間隔（秒）"
+        }
+      }
+    }
+  }
+}

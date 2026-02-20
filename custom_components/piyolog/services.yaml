@@ -1,0 +1,446 @@
+add_pee:
+  name: Add Pee Event
+  description: Register a pee event to PiyoLog
+  fields:
+    baby_id:
+      name: Baby ID
+      description: Baby ID (optional, uses default if not specified)
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Index of baby (0-based, optional)
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+    datetime:
+      name: Date/Time
+      description: Event datetime (optional, defaults to now)
+      example: "2026-02-09T14:30:00"
+      selector:
+        text:
+    memo:
+      name: Memo
+      description: Optional note
+      example: "Lots of pee"
+      selector:
+        text:
+
+add_poo:
+  name: Add Poo Event
+  description: Register a poo event to PiyoLog
+  fields:
+    poo_amount:
+      name: Amount
+      description: Poo amount/volume (optional)
+      example: "normal"
+      selector:
+        select:
+          options:
+            - label: "Not recorded"
+              value: "default"
+            - label: "Bit (ちょこっと)"
+              value: "bit"
+            - label: "Small (少なめ)"
+              value: "small"
+            - label: "Medium (ふつう)"
+              value: "normal"
+            - label: "Large (多め)"
+              value: "large"
+    poo_hardness:
+      name: Hardness
+      description: Poo consistency/hardness (optional)
+      example: "normal"
+      selector:
+        select:
+          options:
+            - label: "Not recorded"
+              value: "default"
+            - label: "Diarrhea (下痢)"
+              value: "diarrhea"
+            - label: "Soft (やわらかめ)"
+              value: "soft"
+            - label: "Normal (ふつう)"
+              value: "normal"
+            - label: "Hard (かため)"
+              value: "hard"
+    poo_color:
+      name: Color
+      description: Poo color (optional)
+      example: "brown"
+      selector:
+        select:
+          options:
+            - label: "Not recorded"
+              value: "default"
+            - label: "White (白)"
+              value: "white"
+            - label: "Yellow (黄)"
+              value: "yellow"
+            - label: "Orange (橙)"
+              value: "orange"
+            - label: "Brown (茶)"
+              value: "brown"
+            - label: "Green (緑)"
+              value: "green"
+            - label: "Red (赤)"
+              value: "red"
+            - label: "Black (黒)"
+              value: "black"
+    baby_id:
+      name: Baby ID
+      description: Baby ID (optional, uses default if not specified)
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Index of baby (0-based, optional)
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+    datetime:
+      name: Date/Time
+      description: Event datetime (optional, defaults to now)
+      example: "2026-02-09T14:30:00"
+      selector:
+        text:
+    memo:
+      name: Memo
+      description: Optional note
+      example: "Big one!"
+      selector:
+        text:
+
+add_sleep:
+  name: Add Sleep Event
+  description: Register a sleep start event to PiyoLog
+  fields:
+    baby_id:
+      name: Baby ID
+      description: Baby ID (optional, uses default if not specified)
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Index of baby (0-based, optional)
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+    datetime:
+      name: Date/Time
+      description: Event datetime (optional, defaults to now)
+      example: "2026-02-09T14:30:00"
+      selector:
+        text:
+    memo:
+      name: Memo
+      description: Optional note
+      example: "Nap time"
+      selector:
+        text:
+
+add_wake_up:
+  name: Add Wake Up Event
+  description: Register a wake up event to PiyoLog
+  fields:
+    baby_id:
+      name: Baby ID
+      description: Baby ID (optional, uses default if not specified)
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Index of baby (0-based, optional)
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+    datetime:
+      name: Date/Time
+      description: Event datetime (optional, defaults to now)
+      example: "2026-02-09T14:30:00"
+      selector:
+        text:
+    memo:
+      name: Memo
+      description: Optional note
+      example: "Woke up happy"
+      selector:
+        text:
+
+add_pee_and_poo:
+  name: Add Pee and Poo Event
+  description: Register both pee and poo events to PiyoLog
+  fields:
+    poo_amount:
+      name: Poo Amount
+      description: Poo amount/volume (optional)
+      example: "normal"
+      selector:
+        select:
+          options:
+            - label: "Not recorded"
+              value: "default"
+            - label: "Bit (ちょこっと)"
+              value: "bit"
+            - label: "Small (少なめ)"
+              value: "small"
+            - label: "Medium (ふつう)"
+              value: "normal"
+            - label: "Large (多め)"
+              value: "large"
+    poo_hardness:
+      name: Poo Hardness
+      description: Poo consistency/hardness (optional)
+      example: "normal"
+      selector:
+        select:
+          options:
+            - label: "Not recorded"
+              value: "default"
+            - label: "Diarrhea (下痢)"
+              value: "diarrhea"
+            - label: "Soft (やわらかめ)"
+              value: "soft"
+            - label: "Normal (ふつう)"
+              value: "normal"
+            - label: "Hard (かため)"
+              value: "hard"
+    poo_color:
+      name: Poo Color
+      description: Poo color (optional)
+      example: "brown"
+      selector:
+        select:
+          options:
+            - label: "Not recorded"
+              value: "default"
+            - label: "White (白)"
+              value: "white"
+            - label: "Yellow (黄)"
+              value: "yellow"
+            - label: "Orange (橙)"
+              value: "orange"
+            - label: "Brown (茶)"
+              value: "brown"
+            - label: "Green (緑)"
+              value: "green"
+            - label: "Red (赤)"
+              value: "red"
+            - label: "Black (黒)"
+              value: "black"
+    baby_id:
+      name: Baby ID
+      description: Baby ID (optional, uses default if not specified)
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Index of baby (0-based, optional)
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+    datetime:
+      name: Date/Time
+      description: Event datetime (optional, defaults to now)
+      example: "2026-02-09T14:30:00"
+      selector:
+        text:
+    memo:
+      name: Memo
+      description: Optional note
+      example: "Full diaper"
+      selector:
+        text:
+
+add_milk:
+  name: Add Milk Event
+  description: Register a milk/formula feeding event
+  fields:
+    amount:
+      name: Amount (ml)
+      description: Amount of milk in milliliters
+      default: 100
+      example: 120
+      selector:
+        number:
+          min: 0
+          max: 500
+          unit_of_measurement: ml
+    baby_id:
+      name: Baby ID
+      description: Baby ID (optional, uses default if not specified)
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Index of baby (0-based, optional)
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+    datetime:
+      name: Date/Time
+      description: Event datetime (optional, defaults to now)
+      example: "2026-02-09T14:30:00"
+      selector:
+        text:
+    memo:
+      name: Memo
+      description: Optional note
+      example: "Formula feeding"
+      selector:
+        text:
+
+add_breastfeeding:
+  name: Add Breastfeeding Event
+  description: Register a breastfeeding event
+  fields:
+    breastfeeding_left_minutes:
+      name: Left Breast (minutes)
+      description: Left breast feeding duration in minutes
+      example: 10
+      selector:
+        number:
+          min: 0
+          max: 60
+          unit_of_measurement: min
+    breastfeeding_right_minutes:
+      name: Right Breast (minutes)
+      description: Right breast feeding duration in minutes
+      example: 10
+      selector:
+        number:
+          min: 0
+          max: 60
+          unit_of_measurement: min
+    breastfeeding_order:
+      name: Feeding Order
+      description: Which breast was used first
+      example: "left_first"
+      selector:
+        select:
+          options:
+            - label: "Unspecified"
+              value: "unspecified"
+            - label: "Left to Right"
+              value: "left_first"
+            - label: "Right to Left"
+              value: "right_first"
+    amount:
+      name: Amount (ml)
+      description: Amount in ml (optional, for tracking expressed breast milk volume)
+      example: 80
+      selector:
+        number:
+          min: 0
+          max: 500
+          unit_of_measurement: ml
+    baby_id:
+      name: Baby ID
+      description: Baby ID (optional, uses default if not specified)
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Index of baby (0-based, optional)
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+    datetime:
+      name: Date/Time
+      description: Event datetime (optional, defaults to now)
+      example: "2026-02-09T14:30:00"
+      selector:
+        text:
+    memo:
+      name: Memo
+      description: Optional note
+      example: "Good feeding session"
+      selector:
+        text:
+
+add_bath:
+  name: Add Bath Event
+  description: Register a bath event to PiyoLog
+  fields:
+    baby_id:
+      name: Baby ID
+      description: Baby ID (optional, uses default if not specified)
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Index of baby (0-based, optional)
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+    datetime:
+      name: Date/Time
+      description: Event datetime (optional, defaults to now)
+      example: "2026-02-09T14:30:00"
+      selector:
+        text:
+    memo:
+      name: Memo
+      description: Optional note
+      example: "Evening bath"
+      selector:
+        text:
+
+add_walk:
+  name: Add Walk Event
+  description: Register a walk/stroll event to PiyoLog
+  fields:
+    baby_id:
+      name: Baby ID
+      description: Baby ID (optional, uses default if not specified)
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Index of baby (0-based, optional)
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+    datetime:
+      name: Date/Time
+      description: Event datetime (optional, defaults to now)
+      example: "2026-02-09T14:30:00"
+      selector:
+        text:
+    memo:
+      name: Memo
+      description: Optional note
+      example: "Walk in the park"
+      selector:
+        text:
+
+force_sync:
+  name: Force Sync (Diagnostic)
+  description: Manually trigger a sync with PiyoLog API to check for new events (for testing/debugging)

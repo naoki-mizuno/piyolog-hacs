@@ -1,0 +1,11 @@
+*
+!.gitignore
+!README.md
+
+!*.py
+!hacs.json
+
+!custom_components/
+!custom_components/**/
+!custom_components/**/*.json
+!custom_components/**/*.yaml
