@@ -34,6 +34,10 @@ API_BASE_URL = "https://api2.piyolog.com"
 API_VERSION = 2.0
 API_SECRET = "NewPiyoLogApp"
 
+# PiyoLog assumes Japan Standard Time (JST, UTC+9) for event datetimes.
+# Used when parsing API "YYYYMMDD HH:mm" and when sending default "now" to the API.
+PIYOLOG_TIMEZONE = "Asia/Tokyo"
+
 
 # Service names
 SERVICE_ADD_PEE = "add_pee"

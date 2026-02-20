@@ -1,8 +1,9 @@
 """DataUpdateCoordinator for PiyoLog integration."""
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
-from typing import Any, Dict, Set, Optional
+from typing import Any, Dict, List, Optional, Set
+from zoneinfo import ZoneInfo
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -15,7 +16,9 @@ from .client import (
     PoopColor,
     BreastfeedingOrder,
 )
-from .const import DOMAIN, EVENT_TYPE_NAMES
+from .const import DOMAIN, EVENT_TYPE_NAMES, PIYOLOG_TIMEZONE
+
+_JST = ZoneInfo(PIYOLOG_TIMEZONE)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -128,7 +131,7 @@ class PiyoLogCoordinator(DataUpdateCoordinator):
             elif new_events:
                 _LOGGER.info("Firing %d new event(s)", len(new_events))
                 for event in new_events:
-                    self._fire_ha_event(event)
+                    self._fire_ha_event(event, baby_events)
 
             _LOGGER.debug(
                 "Sync: %d total, %d new, %d tracked",
@@ -243,6 +246,37 @@ class PiyoLogCoordinator(DataUpdateCoordinator):
                 last_events[key] = event
         return last_events
 
+    def _parse_datetime_jst(self, datetime_str: Optional[str]) -> Optional[datetime]:
+        """Parse PiyoLog "YYYYMMDD HH:mm" or ISO string to JST-aware datetime.
+
+        PiyoLog assumes JST. Comparisons and duration math (e.g. sleep_minutes)
+        use these so all values are in the same timezone.
+        """
+        if not datetime_str:
+            return None
+        s = str(datetime_str).strip()
+        if not s:
+            return None
+        try:
+            if " " in s and len(s) >= 15 and s[8:9] == " ":
+                # PiyoLog format: "20260209 14:30"
+                date_part, time_part = s.split(None, 1)
+                year = int(date_part[0:4])
+                month = int(date_part[4:6])
+                day = int(date_part[6:8])
+                hour, minute = int(time_part[0:2]), int(time_part[3:5])
+                sec = int(time_part[6:8]) if len(time_part) >= 8 else 0
+                return datetime(year, month, day, hour, minute, sec, tzinfo=_JST)
+            # ISO-like: parse and convert to JST
+            dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=_JST)
+            else:
+                dt = dt.astimezone(_JST)
+            return dt
+        except (ValueError, TypeError, IndexError):
+            return None
+
     def build_event_attributes(
         self, event: Dict[str, Any], all_events: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
@@ -348,35 +382,16 @@ class PiyoLogCoordinator(DataUpdateCoordinator):
         )
 
     def _format_datetime_iso(self, datetime_str: Optional[str]) -> Optional[str]:
-        """Convert PiyoLog datetime format to ISO 8601 format.
+        """Convert PiyoLog datetime to ISO 8601 with JST timezone.
+
+        PiyoLog assumes JST. Output includes +09:00 so HA and templates
+        interpret the time correctly.
 
         Args:
-            datetime_str: DateTime string in PiyoLog format "20260209 14:30"
+            datetime_str: PiyoLog "YYYYMMDD HH:mm" or ISO string
 
         Returns:
-            ISO 8601 format string like "2026-02-09T14:30:00" or None
+            ISO 8601 string like "2026-02-09T14:30:00+09:00" or None
         """
-        if not datetime_str:
-            return None
-
-        try:
-            # PiyoLog format: "20260209 14:30"
-            parts = datetime_str.split()
-            if len(parts) != 2:
-                return None
-
-            date_part = parts[0]  # "20260209"
-            time_part = parts[1]  # "14:30"
-
-            # Convert to ISO 8601: "2026-02-09T14:30:00"
-            year = date_part[0:4]
-            month = date_part[4:6]
-            day = date_part[6:8]
-
-            return f"{year}-{month}-{day}T{time_part}:00"
-
-        except Exception as err:
-            _LOGGER.debug(
-                "Failed to convert datetime to ISO: %s - %s", datetime_str, err
-            )
-            return None
+        dt = self._parse_datetime_jst(datetime_str)
+        return dt.isoformat() if dt else None

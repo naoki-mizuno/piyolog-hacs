@@ -3,7 +3,13 @@ import hashlib
 import uuid
 import time
 import dateparser
-from datetime import datetime
+from datetime import datetime, timezone
+
+from zoneinfo import ZoneInfo
+
+# PiyoLog API assumes JST (UTC+9) for event datetimes. Client uses this when
+# defaulting to "now" and when formatting datetimes for the API.
+_JST = ZoneInfo("Asia/Tokyo")
 
 
 # Event Type Constants
@@ -1239,7 +1245,10 @@ class PiyoLogClient:
     @staticmethod
     def _normalize_datetime(dt_input):
         """
-        Convert various datetime formats to required fields.
+        Convert various datetime formats to required fields for the API.
+
+        PiyoLog assumes JST (UTC+9). Default "now" and parsed times are
+        normalized to JST so date/time/datetime sent to the API are correct.
 
         Args:
             dt_input: None, datetime object, int (timestamp), or string
@@ -1251,24 +1260,30 @@ class PiyoLogClient:
             ValueError: If datetime cannot be parsed
         """
         if dt_input is None:
-            dt = datetime.now()
+            dt = datetime.now(_JST)
         elif isinstance(dt_input, datetime):
-            dt = dt_input
+            if dt_input.tzinfo is None:
+                dt = dt_input.replace(tzinfo=_JST)
+            else:
+                dt = dt_input.astimezone(_JST)
         elif isinstance(dt_input, int):
-            # Auto-detect seconds vs milliseconds since epoch
-            if dt_input > 10000000000:  # Likely milliseconds
-                dt = datetime.fromtimestamp(dt_input / 1000)
-            else:  # Likely seconds since epoch
-                dt = datetime.fromtimestamp(dt_input)
+            if dt_input > 10000000000:
+                sec = dt_input / 1000
+            else:
+                sec = dt_input
+            dt = datetime.fromtimestamp(sec, tz=timezone.utc).astimezone(_JST)
         elif isinstance(dt_input, str):
-            # Try dateparser for flexible parsing
-            dt = dateparser.parse(dt_input)
+            dt = dateparser.parse(dt_input, settings={"TIMEZONE": "Asia/Tokyo"})
             if dt is None:
                 raise ValueError(f"Could not parse datetime: {dt_input}")
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=_JST)
+            else:
+                dt = dt.astimezone(_JST)
         else:
             raise ValueError(f"Unsupported datetime type: {type(dt_input)}")
 
-        now_ms = int(datetime.now().timestamp() * 1000)
+        now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
 
         return {
             "date": int(dt.strftime("%Y%m%d")),
