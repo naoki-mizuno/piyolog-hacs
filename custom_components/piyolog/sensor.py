@@ -6,7 +6,11 @@ import logging
 from datetime import datetime
 from typing import Any, Optional
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTime
 from homeassistant.core import HomeAssistant
@@ -129,10 +133,10 @@ class PiyoLogLastEventSensor(CoordinatorEntity[PiyoLogCoordinator], SensorEntity
         self._event_type_name = event_type_name
 
         friendly = _event_type_name_to_friendly(event_type_name)
-        name_suffix = f"PiyoLog Most Recent {friendly}"
+        name = f"PiyoLog Most Recent {friendly}"
         if baby_name:
-            name_suffix = f"{name_suffix} ({baby_name})"
-        self._attr_name = name_suffix
+            name = f"{name} ({baby_name})"
+        self._attr_name = name
         self._attr_unique_id = f"{entry_id}_{baby_id}_{event_type_name}"
         self._attr_icon = _icon_for_event_type(event_type)
 
@@ -158,7 +162,9 @@ class PiyoLogLastEventSensor(CoordinatorEntity[PiyoLogCoordinator], SensorEntity
         return self.coordinator._last_events.get(key)
 
 
-class PiyoLogBreastfeedingTodaySensor(CoordinatorEntity[PiyoLogCoordinator], SensorEntity):
+class PiyoLogBreastfeedingTodaySensor(
+    CoordinatorEntity[PiyoLogCoordinator], SensorEntity
+):
     """Sensor showing cumulative breastfeeding minutes today (HA system timezone)."""
 
     _attr_has_entity_name = True
@@ -178,10 +184,10 @@ class PiyoLogBreastfeedingTodaySensor(CoordinatorEntity[PiyoLogCoordinator], Sen
         super().__init__(coordinator)
         self._baby_id = baby_id
 
-        name_suffix = f"PiyoLog Breastfeeding Today"
+        name = f"PiyoLog Breastfeeding Today"
         if baby_name:
-            name_suffix = f"{name_suffix} ({baby_name})"
-        self._attr_name = name_suffix
+            name = f"{name} ({baby_name})"
+        self._attr_name = name
         self._attr_unique_id = f"{entry_id}_{baby_id}_breastfeeding_today"
 
     @property

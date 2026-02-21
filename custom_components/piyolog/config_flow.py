@@ -26,6 +26,7 @@ from .client import PiyoLogClient
 
 _LOGGER = logging.getLogger(__name__)
 
+
 def _auth_method_schema(translations: dict) -> vol.Schema:
     """Build user step schema with translated auth_method option labels."""
     create_new = "Create new account and link to existing"
@@ -46,6 +47,7 @@ def _auth_method_schema(translations: dict) -> vol.Schema:
             ),
         }
     )
+
 
 STEP_CREATE_DATA_SCHEMA = vol.Schema(
     {

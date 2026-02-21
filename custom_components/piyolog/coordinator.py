@@ -79,7 +79,9 @@ class PiyoLogCoordinator(DataUpdateCoordinator):
         self.client = client
         self._seen_event_ids: Set[str] = set()
         self._babies_cache: Dict[str, str] = {}  # baby_id -> baby_name mapping
-        self._is_first_sync = True  # Track first sync to avoid firing all historical events
+        self._is_first_sync = (
+            True  # Track first sync to avoid firing all historical events
+        )
         # Accumulated latest event per (baby_id, event_type) across all syncs.
         # Kept in memory so delta syncs (which return 0 total events when nothing is new)
         # don't wipe out the data.
@@ -363,10 +365,16 @@ class PiyoLogCoordinator(DataUpdateCoordinator):
                     if str(e.get("baby_id")) != str(baby_id):
                         continue
                     dt = self._parse_datetime_jst(e.get("datetime"))
-                    if dt and dt < wake_dt and (last_sleep_dt is None or dt > last_sleep_dt):
+                    if (
+                        dt
+                        and dt < wake_dt
+                        and (last_sleep_dt is None or dt > last_sleep_dt)
+                    ):
                         last_sleep_dt = dt
                 if last_sleep_dt is not None:
-                    attrs["asleep_minutes"] = int((wake_dt - last_sleep_dt).total_seconds() / 60)
+                    attrs["asleep_minutes"] = int(
+                        (wake_dt - last_sleep_dt).total_seconds() / 60
+                    )
 
         if event_type == EventType.MILK and amount > 0:
             attrs["amount"] = amount
