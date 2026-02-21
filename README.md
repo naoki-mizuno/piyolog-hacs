@@ -1,8 +1,8 @@
-# ぴよログ Home Assistant インテグレーション
+# ぴよログ Home Assistant 統合
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 
-[ぴよログ](https://www.piyolog.com/) の Home Assistant インテグレーションです。
+[ぴよログ](https://www.piyolog.com/) の Home Assistant 統合です。
 
 ## 機能
 
@@ -19,7 +19,7 @@
 1. Home Assistant で HACS を開く
 2. 右上の「⋯」をクリック
 3. 「カスタムリポジトリ」を選択
-4. インテグレーションとして `https://github.com/naoki-mizuno/piyolog-hacs` を追加
+4. 統合として `https://github.com/naoki-mizuno/piyolog-hacs` を追加
 5. ぴよログのカードで「インストール」をクリック
 6. Home Assistant を再起動する
 
@@ -34,7 +34,7 @@
 
 新しいデバイス（アカウント）としてぴよログに登録します。
 
-1. **設定 → デバイスとサービス → インテグレーションを追加** を開く
+1. **設定 → デバイスとサービス → 統合を追加** を開く
 2. 「PiyoLog」で検索する
 3. **「新規アカウントを作成して既存アカウントにリンク」** を選択する
 4. デバイス名を入力（例：「Home Assistant」）
@@ -48,7 +48,7 @@
 
 別環境からの移行や、すでに認証情報を持っている場合に使います。
 
-1. **設定 → デバイスとサービス → インテグレーションを追加** を開く
+1. **設定 → デバイスとサービス → 統合を追加** を開く
 2. 「PiyoLog」で検索する
 3. **「既存の認証情報を使用」** を選択する
 4. `user_id`、`client_id`、`client_token` を入力する
@@ -291,7 +291,7 @@ data:
 
 ### デバッグログ
 
-インテグレーションのカード内メニューからデバッグ出力を有効化するか、 `configuration.yaml` に以下を追加します：
+統合のカード内メニューからデバッグ出力を有効化するか、 `configuration.yaml` に以下を追加します：
 
 ```yaml
 logger:
