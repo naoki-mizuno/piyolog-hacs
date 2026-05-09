@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 import logging
+import time
 from typing import Any, Dict, List, Optional, Set
 from zoneinfo import ZoneInfo
 
@@ -21,6 +22,10 @@ from .const import DOMAIN, EVENT_TYPE_NAMES, PIYOLOG_TIMEZONE
 _JST = ZoneInfo(PIYOLOG_TIMEZONE)
 
 _LOGGER = logging.getLogger(__name__)
+
+# Keep recent events for 24 hours so the delete_most_recent_event service can
+# look back as far as its (user-configurable) max-age guard allows.
+RECENT_EVENTS_WINDOW_SECONDS = 86400
 
 # Reverse mappings: numeric enum value -> human-readable string
 POOP_AMOUNT_REVERSE = {
@@ -93,6 +98,10 @@ class PiyoLogCoordinator(DataUpdateCoordinator):
         # MOTHERS_MILK events keyed by event_id (for today's cumulative sensor).
         # Using a dict allows deletions and edits to be reflected without a full restart.
         self._breastfeeding_events: Dict[str, Dict[str, Any]] = {}
+        # Recent events (any type) keyed by event_id, used by the
+        # delete_most_recent_event service. Bounded by RECENT_EVENTS_WINDOW_SECONDS
+        # so memory stays small (a single sync's worth of recent activity).
+        self._recent_events: Dict[str, Dict[str, Any]] = {}
 
     async def _async_update_data(self) -> Dict[str, Any]:
         """Fetch data from PiyoLog API.
@@ -160,6 +169,7 @@ class PiyoLogCoordinator(DataUpdateCoordinator):
             # that deletions and edits are immediately reflected in sensors.
             self._update_sleep_begin_events(raw_events)
             self._update_breastfeeding_events(raw_events)
+            self._update_recent_events(raw_events)
 
             return {
                 "baby_events": baby_events,
@@ -293,6 +303,31 @@ class PiyoLogCoordinator(DataUpdateCoordinator):
                 _LOGGER.debug("Breastfeeding event removed (deleted): %s", event_id)
             else:
                 self._breastfeeding_events[event_id] = event
+
+    def _update_recent_events(self, raw_events: list) -> None:
+        """Maintain a bounded window of recent events keyed by event_id.
+
+        Used by the delete_most_recent_event service. Soft-deleted events are
+        removed; entries older than RECENT_EVENTS_WINDOW_SECONDS (by created_at)
+        are pruned every sync.
+        """
+        for event in raw_events:
+            event_id = event.get("event_id")
+            if not event_id:
+                continue
+            if event.get("deleted"):
+                self._recent_events.pop(event_id, None)
+            else:
+                self._recent_events[event_id] = event
+
+        cutoff_ms = int(time.time() * 1000) - RECENT_EVENTS_WINDOW_SECONDS * 1000
+        stale = [
+            eid
+            for eid, e in self._recent_events.items()
+            if int(e.get("created_at", 0)) < cutoff_ms
+        ]
+        for eid in stale:
+            self._recent_events.pop(eid, None)
 
     def _parse_datetime_jst(self, datetime_str: Optional[str]) -> Optional[datetime]:
         """Parse PiyoLog "YYYYMMDD HH:mm" or ISO string to JST-aware datetime.

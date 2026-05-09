@@ -441,6 +441,64 @@ add_walk:
       selector:
         text:
 
+delete_most_recent_event:
+  name: Delete Most Recent Event
+  description: >-
+    Soft-delete the most recently registered event (by registration time, not
+    event datetime). Refuses to delete events older than the configured guard.
+  fields:
+    event_type:
+      name: Event Types
+      description: >-
+        Restrict deletion to one or more of these event types (default: any).
+      example: "['pee', 'poo']"
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: "Pee"
+              value: "pee"
+            - label: "Poo"
+              value: "poo"
+            - label: "Sleep"
+              value: "sleep"
+            - label: "Wake Up"
+              value: "wake_up"
+            - label: "Milk"
+              value: "milk"
+            - label: "Breastfeeding"
+              value: "breastfeeding"
+            - label: "Bath"
+              value: "bath"
+            - label: "Walk"
+              value: "walk"
+    max_age_minutes:
+      name: Max Age (minutes)
+      description: >-
+        Refuse to delete if the candidate event was registered more than this
+        many minutes ago. Guard against accidental deletion of older entries.
+      default: 10
+      example: 10
+      selector:
+        number:
+          min: 1
+          max: 180
+          unit_of_measurement: min
+    baby_id:
+      name: Baby ID
+      description: Restrict to events for this baby (optional).
+      example: "abc123def456"
+      selector:
+        text:
+    baby_index:
+      name: Baby Index
+      description: Restrict to events for the baby at this 0-based index (optional).
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+
 force_sync:
   name: Force Sync (Diagnostic)
   description: Manually trigger a sync with PiyoLog API to check for new events (for testing/debugging)

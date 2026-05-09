@@ -659,6 +659,27 @@ class PiyoLogClient:
             data=sync_data,
         )
 
+    def delete_baby_event(self, event):
+        """
+        Soft-delete an existing baby event by re-uploading it with deleted=true.
+
+        PiyoLog has no dedicated delete endpoint: deletion is performed by
+        re-syncing the event with deleted=true, a fresh modified_at, and
+        minor_version=0 so the server treats it as a new revision.
+
+        Args:
+            event: Existing baby event dict (must contain at least event_id,
+                user_id, baby_id, and the original event fields).
+
+        Returns:
+            dict: Server response from sync.
+        """
+        payload = dict(event)
+        payload["deleted"] = True
+        payload["modified_at"] = int(time.time() * 1000)
+        payload["minor_version"] = 0
+        return self.register_baby_event(payload)
+
     def new_baby_event(
         self, event_type, datetime=None, baby_id=None, baby_index=None, memo=""
     ):

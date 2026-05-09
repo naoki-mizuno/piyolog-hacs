@@ -50,6 +50,25 @@ SERVICE_ADD_BREASTFEEDING = "add_breastfeeding"
 SERVICE_ADD_BATH = "add_bath"
 SERVICE_ADD_WALK = "add_walk"
 SERVICE_FORCE_SYNC = "force_sync"
+SERVICE_DELETE_MOST_RECENT_EVENT = "delete_most_recent_event"
+
+# Default and upper-bound (minutes) for the delete_most_recent_event guard:
+# events older than the chosen value (by created_at) are not eligible.
+DEFAULT_DELETE_MAX_AGE_MINUTES = 10
+MAX_DELETE_MAX_AGE_MINUTES = 180
+
+# Map from delete-service event_type selector value to EventType int.
+# Limited to the set of add_* services exposed by this integration.
+DELETE_EVENT_TYPE_MAP = {
+    "pee": EventType.PEE,
+    "poo": EventType.POO,
+    "sleep": EventType.SLEEP_BEGIN,
+    "wake_up": EventType.SLEEP_END,
+    "milk": EventType.MILK,
+    "breastfeeding": EventType.MOTHERS_MILK,
+    "bath": EventType.BATH,
+    "walk": EventType.WALKING,
+}
 
 # Event type to name mapping (for firing HA events in Phase 3)
 EVENT_TYPE_NAMES = {
@@ -106,3 +125,5 @@ ATTR_POO_COLOR = "poo_color"
 ATTR_BREASTFEEDING_LEFT_MINUTES = "breastfeeding_left_minutes"
 ATTR_BREASTFEEDING_RIGHT_MINUTES = "breastfeeding_right_minutes"
 ATTR_BREASTFEEDING_ORDER = "breastfeeding_order"
+ATTR_EVENT_TYPE = "event_type"
+ATTR_MAX_AGE_MINUTES = "max_age_minutes"

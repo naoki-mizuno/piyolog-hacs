@@ -3,11 +3,13 @@
 import asyncio
 from datetime import timedelta
 import logging
+import time
 
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 
 from .client import PiyoLogClient, BreastfeedingOrder
@@ -31,6 +33,10 @@ from .const import (
     SERVICE_ADD_BATH,
     SERVICE_ADD_WALK,
     SERVICE_FORCE_SYNC,
+    SERVICE_DELETE_MOST_RECENT_EVENT,
+    DEFAULT_DELETE_MAX_AGE_MINUTES,
+    MAX_DELETE_MAX_AGE_MINUTES,
+    DELETE_EVENT_TYPE_MAP,
     ATTR_BABY_ID,
     ATTR_BABY_INDEX,
     ATTR_DATETIME,
@@ -42,6 +48,8 @@ from .const import (
     ATTR_BREASTFEEDING_LEFT_MINUTES,
     ATTR_BREASTFEEDING_RIGHT_MINUTES,
     ATTR_BREASTFEEDING_ORDER,
+    ATTR_EVENT_TYPE,
+    ATTR_MAX_AGE_MINUTES,
     POOP_AMOUNT_MAP,
     POOP_HARDNESS_MAP,
     POOP_COLOR_MAP,
@@ -65,6 +73,19 @@ SERVICE_MILK_SCHEMA = SERVICE_BASE_SCHEMA.extend(
         vol.Optional(ATTR_AMOUNT, default=DEFAULT_MILK_AMOUNT): vol.All(
             vol.Coerce(float), vol.Range(min=0)
         ),
+    }
+)
+
+SERVICE_DELETE_MOST_RECENT_SCHEMA = vol.Schema(
+    {
+        vol.Optional(ATTR_BABY_ID): cv.string,
+        vol.Optional(ATTR_BABY_INDEX): cv.positive_int,
+        vol.Optional(ATTR_EVENT_TYPE): vol.All(
+            cv.ensure_list, [vol.In(list(DELETE_EVENT_TYPE_MAP.keys()))]
+        ),
+        vol.Optional(
+            ATTR_MAX_AGE_MINUTES, default=DEFAULT_DELETE_MAX_AGE_MINUTES
+        ): vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_DELETE_MAX_AGE_MINUTES)),
     }
 )
 
@@ -164,6 +185,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             SERVICE_ADD_BATH,
             SERVICE_ADD_WALK,
             SERVICE_FORCE_SYNC,
+            SERVICE_DELETE_MOST_RECENT_EVENT,
         ]:
             hass.services.async_remove(DOMAIN, service)
 
@@ -203,6 +225,7 @@ async def _async_register_services(hass: HomeAssistant, client: PiyoLogClient):
                 coordinator._update_last_events(baby_events)
                 coordinator._update_sleep_begin_events(raw)
                 coordinator._update_breastfeeding_events(raw)
+                coordinator._update_recent_events(raw)
         await coordinator.async_request_refresh()
 
     async def add_pee_service(call: ServiceCall):
@@ -460,6 +483,87 @@ async def _async_register_services(hass: HomeAssistant, client: PiyoLogClient):
     )
     hass.services.async_register(
         DOMAIN, SERVICE_ADD_WALK, add_walk_service, schema=SERVICE_BASE_SCHEMA
+    )
+
+    async def delete_most_recent_event_service(call: ServiceCall):
+        """Soft-delete the most recently registered event.
+
+        "Most recent" is by created_at (registration time), not the event's own
+        datetime. Optional event_type and baby filters narrow the candidate set.
+        Refuses to delete anything older than DELETE_MOST_RECENT_MAX_AGE_SECONDS
+        as a guardrail.
+        """
+        baby_id = call.data.get(ATTR_BABY_ID)
+        baby_index = call.data.get(ATTR_BABY_INDEX)
+        event_types = call.data.get(ATTR_EVENT_TYPE)
+        event_type_ints = (
+            {DELETE_EVENT_TYPE_MAP[t] for t in event_types} if event_types else None
+        )
+        max_age_seconds = call.data[ATTR_MAX_AGE_MINUTES] * 60
+
+        entry_id = next(iter(hass.data[DOMAIN]), None)
+        if not entry_id:
+            raise ServiceValidationError("PiyoLog integration not loaded")
+        coordinator = hass.data[DOMAIN][entry_id]["coordinator"]
+
+        target_baby_id = None
+        if baby_id is not None or baby_index is not None:
+            target_baby_id = await hass.async_add_executor_job(
+                client._resolve_baby_id, baby_id, baby_index
+            )
+
+        candidates = []
+        for event in coordinator._recent_events.values():
+            if (
+                event_type_ints is not None
+                and int(event.get("type", -1)) not in event_type_ints
+            ):
+                continue
+            if target_baby_id is not None and event.get("baby_id") != target_baby_id:
+                continue
+            candidates.append(event)
+
+        if not candidates:
+            raise ServiceValidationError(
+                "No recent event found matching the given filters "
+                f"(event_type={event_types}, baby_id={target_baby_id})"
+            )
+
+        most_recent = max(candidates, key=lambda e: int(e.get("created_at", 0)))
+        age_seconds = (
+            int(time.time() * 1000) - int(most_recent.get("created_at", 0))
+        ) / 1000
+        if age_seconds > max_age_seconds:
+            raise ServiceValidationError(
+                f"Refusing to delete: most recent event is {int(age_seconds)}s old "
+                f"(guard: {max_age_seconds}s)"
+            )
+
+        try:
+            response = await hass.async_add_executor_job(
+                client.delete_baby_event, most_recent
+            )
+            _LOGGER.info(
+                "Soft-deleted event %s (type=%s, baby_id=%s, age=%ds)",
+                most_recent.get("event_id"),
+                most_recent.get("type"),
+                most_recent.get("baby_id"),
+                int(age_seconds),
+            )
+            # Drop locally so a follow-up call doesn't pick the same event
+            # before the next sync round-trips.
+            coordinator._recent_events.pop(most_recent.get("event_id"), None)
+            await coordinator.async_request_refresh()
+            return response
+        except Exception as err:
+            _LOGGER.error("Failed to delete most recent event: %s", err)
+            raise
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_DELETE_MOST_RECENT_EVENT,
+        delete_most_recent_event_service,
+        schema=SERVICE_DELETE_MOST_RECENT_SCHEMA,
     )
 
     # Diagnostic service to manually trigger sync
